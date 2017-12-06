@@ -3,9 +3,9 @@ let memoryBank = [0,5,10,0,11,14,13,4,11,8,8,7,1,4,12,11];
 let cyclesCount = 0;
 let redistributionCycles = [];
 redistributionCycles.push(memoryBank.toString())
-let infiniteLoop = false;
+let infiniteLoop = true;
 
-while (!infiniteLoop){  
+while (infiniteLoop){  
     let maxIdx = findMaxIdx(memoryBank);
     memoryBank = blockRedistribution(maxIdx, memoryBank);    
     findDuplicateCycle(memoryBank);    
@@ -50,7 +50,7 @@ function findDuplicateCycle(currentMemoryBank){
         for (let idx = 0; idx < redistributionCycles.length; idx++){
             let b = redistributionCycles[idx].toString()
             if (a === b){
-                infiniteLoop = true;
+                infiniteLoop = false;
                 console.log("Part Two: ", redistributionCycles.length - idx)
             }
         }
