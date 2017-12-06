@@ -1,1 +1,2 @@
-# AdventCode2017
+# Advent Code 2017
+JavaScript solutions
