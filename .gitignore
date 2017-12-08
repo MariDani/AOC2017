@@ -8,3 +8,5 @@ index\.html
 papaparse\.js
 
 papaparse\.min\.js
+
+*.txt
