@@ -1,12 +1,8 @@
 
 caddy\.exe
 
-*.csv
-
 index\.html
 
 papaparse\.js
 
 papaparse\.min\.js
-
-*.txt
