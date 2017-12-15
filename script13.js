@@ -2,102 +2,96 @@ let regex = /(\d+):\s(\d+)/s;
 
 let inputArray = input.split('\n')
 
-// Part One
-console.log("Part One: ", goThroughFirewall("severity"));
+var firewall = [];
+var range = [];
+var down = [];
 
 
-// let packetDelay = 0;
-// let caught = true;
+function calculate(){
+    [firewall, range, down] = createFirewall(inputArray);
 
-// while (caught){
-//     let delayedTime = goThroughFirewall("delay", packetDelay)
-//     debugger
-//     if (delayedTime == undefined){
-//         packetDelay++
-//     }
-//     else {
-//         // Part Two
-//         console.log("Part Two: ", delayedTime);        
-//         caught = false;
-//     }
-// }
+    let packetDelay = 0;
+    let passed = false;
+    let lastFirewall = firewall.slice() 
+    let lastDown = down.slice()
+
+    // Part One
+    console.log("Part One: ", goThroughFirewall1());
 
 
-function goThroughFirewall(task, delay){
-    let packetPosition = 0;
-    let firewall = [];
-    firewall = createFirewall();
-    let severity = 0;
-    let delayed = false;
-    let idx = 0;
-    let elapsedTime = 0;
-    while (idx < firewall.length){
-        if (firewall[packetPosition] != undefined){
-            if (firewall[packetPosition].scanner === 1) {
-                // you are caught now
-                if (task === "severity") {
-                    severity = severity + (firewall[packetPosition].range * firewall[packetPosition].depth)
-                }           
-                if (task === "delay" && delayed){
-                    return
-                }         
-            }        
-        }    
-        moveScanners(firewall);
-        debugger
-        packetPosition++;
-        idx++;             
-        elapsedTime++
-
-        if (task === "delay" && !delayed) {
-            if (idx >= firewall.length){
-                idx = 0;
-            }
-            if (elapsedTime - 1 === delay){
-                delayed = true;
-                idx = 0;
-                packetPosition = 0;
-            }
-        }         
+    do {
+        passed = !goThroughFirewall2()    
+        if (packetDelay % 100000 === 0) console.log(packetDelay);
+        firewall = lastFirewall.slice();
+        down = lastDown.slice();
+        moveScanners()
+        packetDelay++;
+        lastFirewall = firewall.slice();
+        lastDown = down.slice();
     }
-    if (task === "severity"){
-        return severity;             
-    }
-    if (task === "delay"){
-        return delay
-    }
+    while (!passed)
+
+
+    // Part Two
+    console.log("Part Two: ", packetDelay - 1); // one was added after packet path was checked
 }
 
 
-function createFirewall(){
+function goThroughFirewall1(){
+    let severity = 0;
+    for (let packetPosition = 0; packetPosition < firewall.length; packetPosition++){
+        if (firewall[packetPosition] != undefined && firewall[packetPosition] === 1){
+            severity = severity + (range[packetPosition] * packetPosition);
+        }    
+        moveScanners();
+    }
+    return severity;     
+}
+
+
+function goThroughFirewall2(){
+    let caught = false;
+    for (let packetPosition = 0; packetPosition < firewall.length; packetPosition++){
+        if (firewall[packetPosition] != undefined && firewall[packetPosition] === 1){
+            caught = true;
+        }    
+        moveScanners();
+    }
+    return caught
+}
+
+
+function createFirewall(inputArray){
     let firewall = [];
+    let range = [];
+    let down = [];
     for (let idx = 0; idx < inputArray.length; idx++){
         const layer = regex.exec(inputArray[idx]);
         const layerDepth = layer[1];
         const layerRange = layer[2];
-        firewall[layerDepth] = {
-            depth: layerDepth,
-            range: layerRange,
-            scanner: 1,
-            scannerDown: true
-        }
+        firewall[layerDepth] = 1;
+        range[layerDepth] = parseInt(layerRange);
+        down[layerDepth] = true;
     }   
-    return firewall;
+    return [firewall, range, down];
 }
 
 
-function moveScanners(firewall){
+function moveScanners(){
     for (let idx = 0; idx < firewall.length; idx++){
         if (firewall[idx] != undefined){
-            if (firewall[idx].scannerDown){
-                firewall[idx].scanner++;
+            if (down[idx]){
+                firewall[idx]++;
             }
             else {
-                firewall[idx].scanner--;
+                firewall[idx]--;
             }
-            if (firewall[idx].scanner >= firewall[idx].range || firewall[idx].scanner <= 1){
-                firewall[idx].scannerDown = !firewall[idx].scannerDown
+            if (firewall[idx] >= range[idx] || firewall[idx] <= 1){
+                down[idx] = !down[idx]
             }
         }
     }
 }
+
+
+calculate()
