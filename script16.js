@@ -1,5 +1,6 @@
-let programs = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"];
-// let programs = ["a", "b", "c", "d", "e"];
+// let programs = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"];
+let programs = ["a", "b", "c", "d", "e"];
+let startPrograms = programs.slice();
 
 inputArray = input.split(",");
 
@@ -8,12 +9,27 @@ const regex = /([psx])(\S).?(\S)?/g;
 // Part One
 console.log("Part One:", letsDance().join(""))
 
-// for (let idx = 0; idx < 1000000000 - 1; idx++){
-//     if (idx % 10 === 0) console.log(idx);
-//     letsDance()
-// }
+console.log(startPrograms)
+console.log(programs)
 
-// console.log(programs.join(""))
+let dance = []
+for (let idx = 0; idx <startPrograms.length; idx++){
+    dance.push(programs.indexOf(startPrograms[idx])-idx)
+} 
+
+
+let lastPrograms = programs.slice()
+for (let idx = 0; idx < startPrograms.length; idx++){
+    let newPos = lastPrograms.indexOf(startPrograms[idx]) + dance[idx]
+    if (newPos < 0){
+        newPos = startPrograms.length + newPos;
+    }
+    if (newPos > startPrograms.length - 1){ 
+        newPos = newPos - startPrograms.length;
+    }
+    programs[newPos] = startPrograms[idx]
+}
+console.log(programs)
 
 
 function letsDance(){
