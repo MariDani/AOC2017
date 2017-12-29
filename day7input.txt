@@ -1,4 +1,4 @@
-dihjv (2158) -> gausx, ncdmp, hozgrub
+let input = `dihjv (2158) -> gausx, ncdmp, hozgrub
 qhvca (428) -> odttvb, ymehff, ymyzbqc, jtdtmsi, wciuyuh
 kuvqhnm (77)
 eauol (56)
@@ -1235,4 +1235,4 @@ zspsh (81)
 gvlbzp (78)
 yaqiuq (272) -> aonteu, kafnt, ylpapdi
 cypwd (14)
-ihhmv (72)
+ihhmv (72)`
