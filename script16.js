@@ -1,47 +1,39 @@
-// let programs = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"];
-let programs = ["a", "b", "c", "d", "e"];
-let startPrograms = programs.slice();
-
-inputArray = input.split(",");
-
-const regex = /([psx])(\S).?(\S)?/g;
-
-// Part One
-console.log("Part One:", letsDance().join(""))
-
-console.log(startPrograms)
-console.log(programs)
-
-let dance = []
-for (let idx = 0; idx <startPrograms.length; idx++){
-    dance.push(programs.indexOf(startPrograms[idx])-idx)
-} 
+partOne()
+partTwo()
 
 
-let lastPrograms = programs.slice()
-for (let idx = 0; idx < startPrograms.length; idx++){
-    let newPos = lastPrograms.indexOf(startPrograms[idx]) + dance[idx]
-    if (newPos < 0){
-        newPos = startPrograms.length + newPos;
-    }
-    if (newPos > startPrograms.length - 1){ 
-        newPos = newPos - startPrograms.length;
-    }
-    programs[newPos] = startPrograms[idx]
+function partOne(){
+    let programs = "abcdefghijklmnop".split('');
+    input.split(",").forEach((danceMove) => letsDance(danceMove, programs));
+
+    // Part One
+    console.log("Part One:", programs.join(""))
 }
-console.log(programs)
 
 
-function letsDance(){
-    for (let idx = 0; idx < inputArray.length; idx++){
-        let danceMove = inputArray[idx];
+function partTwo(){
+    let programs = "abcdefghijklmnop".split('');
+    let startPoint = programs.join("");
+    let iterations = 1000000000;
+
+    for (let idx = 0; idx < iterations; idx++){
+        input.split(",").forEach((danceMove) => letsDance(danceMove, programs));
+        if (programs.join("") === startPoint){
+            const repeatCount = idx + 1;
+            idx = Math.floor(iterations/repeatCount) * repeatCount - 1;
+        }
+    }
+
+    // Part Two
+    console.log("Part Two:", programs.join(""))
+}
+
+
+function letsDance(danceMove, programs){
         switch (danceMove.charAt(0)){
             case "s":
                 const spinCount = parseInt(danceMove.match(/\d+/g));
-                let spined = programs.splice(programs.length - spinCount, spinCount);
-                for (let spinIdx = spined.length - 1; spinIdx >= 0; spinIdx--){
-                    programs.unshift(spined[spinIdx])
-                }
+                programs.unshift(...programs.splice(-spinCount, spinCount))
                 break;
             case "x":
                 const exchange = danceMove.match(/\d+/g);
@@ -59,7 +51,4 @@ function letsDance(){
                 programs[partner1Idx] = partner[1];
                 break;    
         }
-
-    }
-    return programs
 }
