@@ -1,6 +1,9 @@
 // Part One
 partOne()
 
+// Part Two
+partTwo()
+
 
 function partOne(){
     let registers = {
@@ -13,11 +16,7 @@ function partOne(){
         g: 0,
         h: 0
     };
-    console.log("Part One: ", doInstructions(registers));
-}
 
-
-function doInstructions(registers){
     let mulCount = 0;
     inputArray = input.split('\n');
     const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i
@@ -50,7 +49,7 @@ function doInstructions(registers){
                 if (jnzIdx != 0){
                     idx = idx + getModifyValue((instruction[3]), registers);
                     if (idx < 0 || idx > inputArray.length - 1){
-                        return mulCount;
+                        return console.log("Part One:", mulCount);
                     }
                 }
                 else idx++;
@@ -66,4 +65,35 @@ function getModifyValue(regValue, registers){
         modValue = registers[`${regValue}`];
     }
     return modValue;
+}
+
+
+// I made this part two thanks to BOT-Brad's solution https://www.reddit.com/user/BOT-Brad 
+// and peasant trip's solution https://www.reddit.com/user/peasant-trip
+function partTwo(){
+    let reg = {
+        b: 81,
+        c: 0,
+        d: 0,
+        f: 0,
+        g: 0,
+        h: 0
+    }
+    reg["b"] = reg["b"] * 100 + 100000
+    reg["c"] = reg["b"] + 17000
+    do {
+        reg["f"] = 1
+        reg["d"] = 2        
+        for (reg["d"]; reg["d"] * reg["d"] < reg["b"]; reg["d"]++) {
+            if (reg["b"] % reg["d"] === 0) {
+                reg["f"] = 0
+                break
+            }
+        }
+        if (reg["f"] === 0) reg["h"]++
+        reg["g"] = reg["b"] - reg["c"]
+        reg["b"] += 17
+    } while (reg["g"] !== 0)
+    
+    return console.log("Part Two:", reg["h"])
 }
