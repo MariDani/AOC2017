@@ -1,45 +1,134 @@
-inputArray = input.split('\n');
-
-const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i
-
-
 // Part One
-let registers = [];
-let values = [];
-let soundsPlayed = [];
-console.log("Part One: ", playSounds())
-
+console.log("Part One:", partOne())
 
 // Part Two
-// let programs0 = [];
-// let values0 = [];
-// let queueFrom0 = [];
-// let queueFrom1 = [];
-// let idx0 = 0;
-// let sendCount0 = 0;
-// let idx1 = 0;
-// let sendCount1 = 0;
-// let programs1 = [];
-// let values1 = [];
-// let waiting0 = false;
-// [waiting0, idx0, sendCount0] = runPrograms(idx0, sendCount0, programs0, values0, 0, queueFrom0, queueFrom1)
-// let waiting1 = false;
-// [waiting1, idx1, sendCount1]  = runPrograms(idx1, sendCount1, programs1, values1, 1, queueFrom1, queueFrom0)
+console.log("Part Two:", partTwo())
 
-// while (waiting0 && queueFrom1.length > 0){
-//     runPrograms(idx0, sendCount0, programs0, values0, 0, queueFrom0, queueFrom1)
-//     while(waiting1 && queueFrom0.length > 0){
-//         runPrograms(idx1, sendCount1, programs1, values1, 1, queueFrom1, queueFrom0)
-        
-//     }
-// }
+function partTwo(){
+    inputArray = input.split('\n');
+
+    let program0 = {
+        registers: [],
+        values : [],
+        queueRcv: [],
+        id: 0,
+        sndCount: 0,
+        idx: 0,
+        terminated: false
+    }
+
+    let program1 = {
+        registers: [],
+        values : [],
+        queueRcv: [],
+        id: 1,
+        sndCount: 0,
+        idx: 0,
+        terminated: false
+    }    
+
+    runPrograms(program0, program1.queueRcv)      
+    runPrograms(program1, program0.queueRcv)
+    
+    while ((program0.queueRcv.length > 0 || program1.queueRcv.length > 0) && !program0.terminated && !program0.terminated){
+        runPrograms(program0, program1.queueRcv)  
+        runPrograms(program1, program0.queueRcv)
+    }
+
+    return program1.sndCount
+}
+
+function runPrograms(program, queueSnd){ 
+    let idx = program.idx;
+    let registers = program.registers;
+    let values = program.values;
+    let queueRcv = program.queueRcv;
+    const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i;
+
+    while (idx < inputArray.length){
+        program.idx = idx;
+        const instruction = regex.exec(inputArray[idx]);
+        // console.log(instruction);
+        const registerName = instruction[2];
+        // check if register is not a number
+        if (isNaN(registerName)){
+            // check if register exists, if not create register and assing 0 value
+            if (registers.indexOf(registerName) < 0){
+                registers.push(registerName);
+                values.push(program.id);
+            } 
+        }           
+        switch (instruction[1]){
+            case "snd": 
+                if (isNaN(registerName)){
+                    queueSnd.push(values[registers.indexOf(registerName)]);
+                }
+                else queueSnd.push(parseInt(registerName));
+                program.sndCount++;
+                break;
+            case "set": 
+                let setIdx = registers.indexOf(registerName);
+                values[setIdx] = getModifyValue((instruction[3]), registers, values);
+                break;
+            case "add":
+                let addIdx = registers.indexOf(registerName);
+                values[addIdx] = values[addIdx] + getModifyValue((instruction[3]), registers, values);
+                break;
+            case "mul":
+                let mulIdx = registers.indexOf(registerName);
+                values[mulIdx] = values[mulIdx] * getModifyValue((instruction[3]), registers, values);
+                break;
+            case "mod":
+                let modIdx = registers.indexOf(registerName);
+                values[modIdx] = values[modIdx] % getModifyValue((instruction[3]), registers, values);
+                break;
+            case "rcv":
+                if (queueRcv.length > 0){
+                    let rcvIdx = registers.indexOf(registerName);
+                    values[rcvIdx] = queueRcv.shift();
+                }  
+                else {  
+                    return 
+                }
+                break;
+            case "jgz":
+                if (isNaN(registerName)){
+                    let jgzIdx = registers.indexOf(registerName);
+                    if (values[jgzIdx] > 0){
+                        idx = idx + getModifyValue((instruction[3]), registers, values);
+                        if (idx < 0 || idx > inputArray.length - 1){
+                            program.terminated = true;
+                            return 
+                        }
+                        idx--;
+                    }
+                }
+                else {
+                    if (parseInt(registerName) > 0){
+                        idx = idx + getModifyValue((instruction[3]), registers, values);
+                        if (idx < 0 || idx > inputArray.length - 1){
+                            program.terminated = true;
+                            return 
+                        }
+                        idx--;
+                    }
+                }
+                break;
+        }
+        idx++;
+    }
+}
 
 
+function partOne(){
+    inputArray = input.split('\n');
+    const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i;
 
+    let registers = [];
+    let values = [];
+    let soundsPlayed = [];
 
-
-function playSounds(){
-    let idx = 0
+    let idx = 0;
     while (idx < inputArray.length){
         const instruction = regex.exec(inputArray[idx]);
         // console.log(instruction);
@@ -52,29 +141,29 @@ function playSounds(){
         switch (instruction[1]){
             case "snd": 
                 soundsPlayed.push(values[registers.indexOf(registerName)]);
-                break
+                break;
             case "set": 
                 let setIdx = registers.indexOf(registerName);
                 values[setIdx] = getModifyValue((instruction[3]), registers, values);
-                break
+                break;
             case "add":
                 let addIdx = registers.indexOf(registerName);
                 values[addIdx] = values[addIdx] + getModifyValue((instruction[3]), registers, values);
-                break
+                break;
             case "mul":
                 let mulIdx = registers.indexOf(registerName);
                 values[mulIdx] = values[mulIdx] * getModifyValue((instruction[3]), registers, values);
-                break
+                break;
             case "mod":
                 let modIdx = registers.indexOf(registerName);
                 values[modIdx] = values[modIdx] % getModifyValue((instruction[3]), registers, values);
-                break
+                break;
             case "rcv":
                 let rcvIdx = registers.indexOf(registerName);
                 if (values[rcvIdx] != 0){                    
                     return soundsPlayed[soundsPlayed.length-1]
                 }
-                break
+                break;
             case "jgz":
                 let jgzIdx = registers.indexOf(registerName);
                 if (values[jgzIdx] > 0){
@@ -84,80 +173,11 @@ function playSounds(){
                     }
                     idx--;
                 }
-                break
+                break;
         }
         idx++;
     }
 }
-
-
-
-// function runPrograms(idx, sendCount, registers, values, id, toQueue, fromQueue){
-//     while (idx < inputArray.length){
-//         const instruction = regex.exec(inputArray[idx]);
-//         const registerName = instruction[2];
-//         if (registers.indexOf(registerName) < 0){
-//             registers.push(registerName);
-//             values.push(id);
-//         }    
-//         switch (instruction[1]){
-//             case "snd": 
-//                 toQueue.push(values[registers.indexOf(registerName)]);                
-//                 sendCount++
-//                 break
-//             case "set": 
-//                 let setIdx = registers.indexOf(registerName);
-//                 values[setIdx] = getModifyValue((instruction[3]), registers, values);
-//                 break
-//             case "add":
-//                 let addIdx = registers.indexOf(registerName);
-//                 values[addIdx] = values[addIdx] + getModifyValue((instruction[3]), registers, values);
-//                 break
-//             case "mul":
-//                 let mulIdx = registers.indexOf(registerName);
-//                 values[mulIdx] = values[mulIdx] * getModifyValue((instruction[3]), registers, values);
-//                 break
-//             case "mod":
-//                 let modIdx = registers.indexOf(registerName);
-//                 values[modIdx] = values[modIdx] % getModifyValue((instruction[3]), registers, values);
-//                 break
-//             case "rcv":
-//                 let rcvIdx = registers.indexOf(registerName);
-//                 if (fromQueue.length > 0){
-//                     values[rcvIdx] = fromQueue.shift()
-//                     break
-//                 }
-//                 else {
-//                     console.log("waiting for data in queue")
-//                     console.log(id, ": ", sendCount)
-//                     return [true, idx, sendCount];
-//                 }
-                
-//             case "jgz":
-//                 let jgzIdx = parseInt(registerName);
-//                 if (isNaN(jgzIdx)){ 
-//                     let jgzIdx = registers.indexOf(registerName);
-//                     if (values[jgzIdx] > 0){
-//                         idx = idx + getModifyValue((instruction[3]), registers, values);
-//                         if (idx < 0 || idx > inputArray.length - 1){
-//                             return [false, idx, sendCount]
-//                         }
-//                         idx--;
-//                     }
-//                 }
-//                 else if (jgzIdx > 0){
-//                     idx = idx + getModifyValue((instruction[3]), registers, values);
-//                     if (idx < 0 || idx > inputArray.length - 1){
-//                         return [false, idx, sendCount]
-//                     }
-//                     idx--;
-//                 }                
-//                 break
-//         }
-//         idx++;
-//     }
-//     return [false, idx, sendCount]
-// }
 
 
 function getModifyValue(regValue, registers, values){
