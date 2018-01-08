@@ -1,69 +1,69 @@
-inputArray = input.split('\n');
-
-const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i
-
-
 // Part One
-let registers = [];
-let values = [];
-let mulCount = 0;
-console.log("Part One: ", doInstructions())
+partOne()
 
 
-function doInstructions(){
+function partOne(){
+    let registers = {
+        a: 0,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0,
+        f: 0,
+        g: 0,
+        h: 0
+    };
+    console.log("Part One: ", doInstructions(registers));
+}
+
+
+function doInstructions(registers){
+    let mulCount = 0;
+    inputArray = input.split('\n');
+    const regex = /([a-z]{3})\s(\S{1})\s?(\S+)?/i
+
     let idx = 0
     while (idx < inputArray.length){     
         const instruction = regex.exec(inputArray[idx]);
-        // console.log(instruction);
         const registerName = instruction[2];
-        // check if first value is not number
-        if (isNaN(registerName)){
-            // check if register exists, if not create register and assing 0 value
-            if (registers.indexOf(registerName) < 0){
-                registers.push(registerName);
-                values.push(0);
-            }    
-        }        
         
         switch (instruction[1]){
             case "set": 
-                let setIdx = registers.indexOf(registerName);
-                values[setIdx] = getModifyValue((instruction[3]), registers, values);
+                registers[`${registerName}`] = getModifyValue((instruction[3]), registers);
+                idx++;
                 break
             case "sub":
-                let subIdx = registers.indexOf(registerName);
-                values[subIdx] = values[subIdx] - getModifyValue((instruction[3]), registers, values);
+                registers[`${registerName}`] = registers[`${registerName}`] - getModifyValue((instruction[3]), registers);
+                idx++;
                 break
             case "mul":
-                let mulIdx = registers.indexOf(registerName);
-                values[mulIdx] = values[mulIdx] * getModifyValue((instruction[3]), registers, values);
+                registers[`${registerName}`] = registers[`${registerName}`] * getModifyValue((instruction[3]), registers);
                 mulCount++;
+                idx++;
                 break
             case "jnz":
                 let jnzIdx;
                 if (isNaN(registerName)){
-                     jnzIdx = registers.indexOf(registerName);
+                     jnzIdx = registers[`${registerName}`];
                 }
                 else jnzIdx = parseInt(registerName);
-                if (values[jnzIdx] != 0){
-                    idx = idx + getModifyValue((instruction[3]), registers, values);
+                if (jnzIdx != 0){
+                    idx = idx + getModifyValue((instruction[3]), registers);
                     if (idx < 0 || idx > inputArray.length - 1){
                         return mulCount;
                     }
-                    idx--;
                 }
+                else idx++;
                 break
         }
-        idx++;
     }
 }
 
 
-function getModifyValue(regValue, registers, values){
+function getModifyValue(regValue, registers){
     let modValue = parseInt(regValue);
     if (isNaN(modValue)){
-        const index = registers.indexOf(regValue)
-        modValue = values[index];
+        modValue = registers[`${regValue}`];
     }
     return modValue;
 }
